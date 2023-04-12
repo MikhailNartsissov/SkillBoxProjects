@@ -1,0 +1,541 @@
+def ask_user(f_question='Хотите ввести максимальную глубину Y/N?',
+             f_err_msg='Пожалуйста, введите Y или N (можно Д или Н)',
+             f_retries=3):
+    while f_retries > 0:
+        f_answer = input(f_question).strip().lower()
+        if f_answer == 'y' or f_answer == 'д':
+            return True
+        elif f_answer == 'n' or f_answer == 'н':
+            return False
+        else:
+            f_retries -= 1
+            print(f_err_msg)
+    print('Превышено максимально допустимое число попыток. Используется значение по умолчанию.')
+    return False
+
+
+def value_by_key(f_dict, f_key, f_depth=3):
+    if f_key in f_dict.keys() and f_depth > 0:
+        return f_dict[f_key]
+    for f_subdict in f_dict.values():
+        if isinstance(f_subdict, dict):
+            f_search_value = value_by_key(f_subdict, f_key, f_depth=f_depth - 1)
+            if f_search_value:
+                break
+    else:
+        return None
+    return f_search_value
+
+
+site = {
+    'html': {
+        'head': {
+            'title': 'Мой сайт'
+        },
+        'body': {
+            'h2': 'Здесь будет мой заголовок',
+            'div': 'Тут, наверное, какой-то блок',
+            'p': 'А вот здесь новый абзац'
+        }
+    }
+}
+
+key_to_find = input('Введите искомый ключ: ')
+
+if ask_user():
+
+    max_depth = int(input('Введите максимальную глубину: '))
+    while max_depth <= 0 or max_depth > 3:
+        print('Максимальная глубина поиска не может быть меньше 1 или больше 3. Попробуйте снова.', end=' ')
+        max_depth = int(input('Введите максимальную глубину: '))
+
+    value = value_by_key(site, key_to_find, f_depth=max_depth)
+else:
+    value = value_by_key(site, key_to_find)
+
+print('Значение ключа:', value)
+
+********************************************************************************
+
+import re
+
+
+def prepare_list(f_string):
+    f_string = f_string[1:len(data) - 1]
+    f_list = f_string.split(',')
+    for f_item_index in range(len(f_list)):
+        f_list[f_item_index] = f_list[f_item_index].strip()
+    return f_list
+
+
+def is_float(f_string):
+    if re.match(r"\d+\.*\d*", f_string):
+        return True
+    else:
+        return False
+
+
+def data_type(f_string):
+    if f_string.startswith('(') and f_string.endswith(')'):
+        return 'кортеж', 'Неизменяемый (immutable)', tuple(prepare_list(f_string))
+    elif f_string.startswith('[') and f_string.endswith(']'):
+        return 'список', 'Изменяемый (mutable)', list(prepare_list(f_string))
+    elif f_string.startswith('{') and f_string.endswith('}'):
+        if ": " in f_string:
+            prepared_data = prepare_list(f_string)
+            for item_index in range(len(prepared_data)):
+                prepared_data[item_index] = prepared_data[item_index].split(':')
+            f_data = {prepared_data[index][0]: prepared_data[index][1] for index in range(len(prepared_data))}
+            return 'словарь', 'Изменяемый (mutable)', f_data
+        else:
+            return 'множество', 'Изменяемый (mutable)', set(prepare_list(f_string))
+    elif f_string.strip().isdecimal():
+        return 'целое число', 'Неизменяемый (immutable)', int(f_string.strip())
+    elif is_float(f_string.strip()):
+        return 'вещественное число', 'Неизменяемый (immutable)', float(f_string.strip())
+    elif f_string.strip().lower() == 'true' or f_string.strip().lower() == 'false':
+        return 'логический', 'Неизменяемый (immutable)', bool(f_string.strip().capitalize())
+    else:
+        return 'строка', 'Неизменяемый (immutable)', f_string
+
+
+data = input('Введите исходные данные: ')
+type_of_data, changeable, data = data_type(data)
+print('\nТип данных:', type_of_data)
+print('Id объекта:', id(data))
+
+********************************************************************************
+
+def add_num(f_num, f_list=None):
+    if f_list is None:
+        f_list = []
+    f_list.append(f_num)
+    print(f_list)
+
+
+add_num(5)
+add_num(10)
+add_num(15)
+
+********************************************************************************
+
+def power(a, n):
+    if n == 0:
+        return 1
+    elif n < 0:
+        return 1 / (a * power(a, -n - 1))
+    else:
+        return a * power(a, n - 1)
+
+
+float_num = float(input('Введите вещественное число: '))
+int_num = int(input('Введите степень числа: '))
+print(float_num, '**', int_num, '=', power(float_num, int_num))
+
+********************************************************************************
+
+path = input('Путь к файлу: ')
+disk = input('На каком диске должен лежать файл: ')
+extension = input('Требуемое расширение файла: ')
+
+if not path.startswith(disk):
+    print('Ошибка: Имя диска указано неверно.')
+elif not path.endswith(extension):
+    print('Ошибка: Расширение файла указано неверно.')
+else:
+    print('Путь корректен!')
+
+********************************************************************************
+
+congrats_text = input('Введите шаблон поздравления, '
+                      'в шаблоне нужно использовать конструкции '
+                      '{name} и {age}: ')
+while not ('{name}' in congrats_text) or not ('{age}' in congrats_text):
+    print('Ошибка. Отсутствует одна или обе конструкции {name}/{age}')
+    congrats_text = input('Введите шаблон поздравления, '
+                          'в шаблоне нужно использовать конструкции '
+                          '{name} и {age}: ')
+
+names_list = input('Введите список имён через запятую: ').split(', ')
+ages_list = input('Введите список возрастов людей через пробел: ').split()
+
+print()
+for i_man in range(len(names_list)):
+    print(congrats_text.format(name=names_list[i_man], age=ages_list[i_man]))
+
+people = [
+    ' '.join(
+        [
+            names_list[i_man],
+            ages_list[i_man]
+        ]
+    )
+    for i_man in range(len(names_list))]
+
+people = ', '.join(people)
+
+print('\nИменинники: ', people)
+
+********************************************************************************
+
+name = input('Введите имя: ')
+debt = int(input('Введите долг: '))
+print('{0}! {0}, привет! Как дела, {0}? Где мои {1} рублей? {0}!'.format(name, debt))
+
+********************************************************************************
+
+participants_quantity = int(input('Кол-во участников: '))
+team_members_quantity = int(input('Кол-во человек в команде: '))
+first_member_index = 1
+team_list = []
+
+if participants_quantity % team_members_quantity == 0:
+    for _ in range(participants_quantity // team_members_quantity):
+        team_list.append(list(range(first_member_index, first_member_index + team_members_quantity)))
+        first_member_index += team_members_quantity
+else:
+    print(participants_quantity, 'участников невозможно поделить на команды по', team_members_quantity, 'человек!')
+
+# for _ in range(participants_quantity // team_members_quantity):
+#     team_list.append(list(range(first_member_index, first_member_index + team_members_quantity)))
+#     first_member_index += team_members_quantity
+# team_list.append(list(range(first_member_index, first_member_index + participants_quantity % team_members_quantity)))
+# print('\nОбщий список команд:', team_list, sep='')
+
+********************************************************************************
+
+def special_symbols(f_list):
+    f_special_symbols = 0
+    for f_symbol in f_list:
+        if f_symbol == '!' or f_symbol == '?':
+            f_special_symbols += 1
+    return f_special_symbols
+
+
+first_message = list(input('Первое сообщение: '))
+second_message = list(input('Второе сообщение: '))
+
+if special_symbols(first_message) > special_symbols(second_message):
+    if not(len(second_message) == special_symbols(second_message)):
+        second_message.insert(0, ' ')
+    first_message.extend(second_message)
+    for letter in first_message:
+        print(letter, end='')
+elif special_symbols(first_message) == special_symbols(second_message):
+    print('Ой!')
+else:
+    if not(len(first_message) == special_symbols(first_message)):
+        first_message.insert(0, ' ')
+    second_message.extend(first_message)
+    for letter in second_message:
+        print(letter, end='')
+
+********************************************************************************
+
+server_data = {
+    "server": {
+        "host": "127.0.0.1",
+        "port": "10"
+    },
+    "configuration": {
+        "access": "true",
+        "login": "Ivan",
+        "password": "qwerty"
+    }
+}
+print()
+for server_data_key, server_data_value in server_data.items():
+    print(server_data_key, ':', sep='')
+    for key, value in server_data[server_data_key].items():
+        print('     ', key, ': ', value, sep='')
+
+********************************************************************************
+
+name = ''
+phonebook = dict()
+choice = ''
+while name.lower() != 'хватит':
+    name = input('Введите имя контакта (\'хватит\' для завершения работы): ')
+    if name.lower() == 'хватит':
+        print('Всего Вам доброго! Хорошего дня.')
+        break
+    surname = input('Введите фамилию контакта: ')
+    phone = input('Введите номер телефона контакта: ')
+    if (name, surname) not in phonebook:
+        phonebook[(name, surname)] = phone
+    else:
+        print('ВНИМАНИЕ! {0} {1} уже есть в списке. Обновить номер телефона y/n или д/н? '.format(name, surname),
+              end='')
+        choice = input().lower()
+        while choice != 'y' and choice != 'n' and choice != 'д' and choice != 'н':
+            print('Введено недопустимое значение выбора. Введите y/n или д/н', end=' ')
+            choice = input().lower()
+        if choice == 'y' or choice == 'д':
+            phonebook[(name, surname)] = phone
+    print('\nТекущий словарь контактов:')
+    for key, value in phonebook.items():
+        print('Имя:', key[0])
+        print('Фамилия:', key[1])
+        print('Номер телефона:', value, '\n')
+
+********************************************************************************
+
+from math import pi
+
+
+def area(f_radius, f_height):
+    f_side = 2 * pi * f_radius * f_height
+    f_full = f_side + 2 * pi * f_radius ** 2
+    return f_side, f_full
+
+
+radius = int(input('Введите значение радиуса цилиндра: '))
+height = int(input('Введите значение высоты цилиндра: '))
+
+side, full = area(radius, height)
+
+print('\nПлощадь боковой поверхности такого цилиндра составляет: ', side)
+print('Общая площадь поверхности такого цилиндра составляет: ', full)
+
+********************************************************************************
+
+from random import choice
+
+
+alphabet = 'абвгдеёжзийклмнопрстуфхцчшщьыъэюя'
+first_list = [choice(alphabet) for _ in range(10)]
+second_list = [choice(alphabet) for _ in range(10)]
+first_dict = {element_index: element_value for element_index, element_value in enumerate(first_list)}
+second_dict = {element_index: element_value for element_index, element_value in enumerate(second_list)}
+
+print('\nПервый список:', first_list)
+print('Второй список:', second_list)
+print('\nПервый словарь:', first_dict)
+print('Второй словарь:', second_dict)
+
+********************************************************************************
+
+student_info = input('Введите в одну строку через пробел'
+                     'фамилию, имя студента, город проживания, вуз, в котором он учится, '
+                     'и все его оценки.\n\n'
+                     )
+student_data_list = student_info.split()
+student_dict = dict()
+student_dict['Фамилия'] = student_data_list[0]
+student_dict['Имя'] = student_data_list[1]
+student_dict['Город проживания'] = student_data_list[2]
+student_dict['ВУЗ'] = student_data_list[3]
+student_dict['Оценки'] = ' '.join(student_data_list[4:])
+print('\nРезультат: ')
+for student in student_dict:
+    print(student, '-', student_dict[student])
+
+********************************************************************************
+
+players_dict = {
+    1: {'name': 'Vanya', 'team': 'A', 'status': 'Rest'},
+    2: {'name': 'Lena', 'team': 'B', 'status': 'Training'},
+    3: {'name': 'Maxim', 'team': 'C', 'status': 'Travel'},
+    4: {'name': 'Egor', 'team': 'C', 'status': 'Rest'},
+    5: {'name': 'Andrei', 'team': 'A', 'status': 'Training'},
+    6: {'name': 'Sasha', 'team': 'A', 'status': 'Rest'},
+    7: {'name': 'Alina', 'team': 'B', 'status': 'Rest'},
+    8: {'name': 'Masha', 'team': 'C', 'status': 'Travel'}
+}
+rest_a = [player['name']
+          for player in players_dict.values()
+          if player['team'] == 'A' and player['status'] == 'Rest'
+          ]
+training_b = [player['name']
+              for player in players_dict.values()
+              if player['team'] == 'B' and player['status'] == 'Training'
+              ]
+travel_c = [player['name']
+            for player in players_dict.values()
+            if player['team'] == 'C' and player['status'] == 'Travel'
+            ]
+print('\nВ команде А отдыхают: ', ', '.join(rest_a))
+print('В команде B тренируются: ', ', '.join(training_b))
+print('В команде C путешествуют: ', ', '.join(travel_c))
+
+********************************************************************************
+
+incomes = {
+    'apple': 5600.20,
+    'orange': 3500.45,
+    'banana': 5000.00,
+    'bergamot': 3700.56,
+    'durian': 5987.23,
+    'grapefruit': 300.40,
+    'peach': 10000.50,
+    'pear': 1020.00,
+    'persimmon': 310.00,
+}
+total_income = sum(incomes.values())
+print('\nОбщий доход за год составил', total_income)
+lowest_income = min(incomes.values())
+for fruit in incomes:
+    if incomes[fruit] == lowest_income:
+        print('Самый маленький доход у {0}. Он составляет {1} рублей'.format(fruit, lowest_income))
+        incomes.pop(fruit)
+        break
+print('Итоговый словарь:', incomes)
+
+********************************************************************************
+
+from random import randint
+
+
+nums_1 = [29, 17, 10, 15, 13, 22, 12, 22, 7, 24, 26, 3, 11, 2, 3, 16, 19, 21, 2, 3, 8, 27, 2, 17, 2, 20, 12, 21, 3, 1]
+nums_2 = [16, 21, 30, 24, 5, 7, 23, 13, 11, 5, 21, 5, 19, 9, 12, 9, 15, 16, 29, 8, 16, 1, 22, 15, 16, 9, 1, 13, 21, 21]
+
+nums_1 = set(nums_1)
+nums_2 = set(nums_2)
+
+print('\n1 - е множество:', set(nums_1))
+print('2 - е множество:', set(nums_2))
+
+min1 = min(nums_1)
+min2 = min(nums_2)
+
+print('\nМинимальный элемент 1 - го множества:', min1)
+print('Минимальный элемент 2 - го множества:', min2)
+
+nums_1.remove(min1)
+nums_2.remove(min2)
+
+random_num1 = randint(100, 200)
+random_num2 = randint(100, 200)
+
+print('\nСлучайное число для 1 - го множества:', random_num1)
+print('Случайное число для 2 - го множества:', random_num2)
+
+nums_1.add(random_num1)
+nums_2.add(random_num2)
+
+print('\nОбъединение множеств:', nums_1 | nums_2)
+print('Пересечение множеств:', nums_1 & nums_2)
+print('Элементы, входящие в nums_2, но не входящие в nums_1:', nums_2 - nums_1)
+
+********************************************************************************
+
+import os
+
+
+def file_find(f_path, f_name):
+    for f_element in os.listdir(f_path):
+        c_path = os.path.join(f_path, f_element)
+        if f_name == f_element:
+            print(c_path)
+        if os.path.isdir(c_path):
+            file_find(c_path, f_name)
+    else:
+        return None
+
+
+pathname = input('Ищем в: ')
+filename = input('Имя файла: ')
+print('Найдены следующие пути: ')
+file_find(pathname, filename)
+
+********************************************************************************
+
+import os
+
+
+def file_find(f_path, f_name):
+    for f_element in os.listdir(f_path):
+        c_path = os.path.join(f_path, f_element)
+        if f_name == f_element:
+            filelist.append(c_path)
+        if os.path.isdir(c_path):
+            file_find(c_path, f_name)
+    else:
+        return None
+
+
+pathname = input('Ищем в: ')
+filename = input('Имя файла: ')
+filelist = list()
+file_find(pathname, filename)
+output_file = open('scripts.txt', 'a', encoding='utf-8')
+for i_file in filelist:
+    file_to_add = open(i_file, 'r', encoding='utf-8')
+    for i_line in file_to_add:
+        output_file.write(i_line)
+    output_file.write('\n' + '*' * 80 + '\n' * 2)
+    file_to_add.close()
+output_file.close()
+
+********************************************************************************
+
+import os
+
+
+dir_to_show = os.path.abspath(os.path.join('..', 'Lesson 9.1'))
+print()
+
+for i_elem in os.listdir(dir_to_show):
+    path_to_file = os.path.abspath(os.path.join(i_elem))
+    print('     ', path_to_file)
+
+********************************************************************************
+
+import os
+from random import randint
+
+
+def file_find(f_path, f_name):
+    for f_element in os.listdir(f_path):
+        c_path = os.path.join(f_path, f_element)
+        if f_name == f_element:
+            filelist.append(c_path)
+        if os.path.isdir(c_path):
+            file_find(c_path, f_name)
+    else:
+        return None
+
+
+pathname = input('Ищем в: ')
+filename = input('Имя файла: ')
+filelist = list()
+print('Найдены следующие пути: ')
+file_find(pathname, filename)
+print(filelist)
+random_file = open(
+    filelist[
+        randint(0, len(filelist)
+                )
+    ],
+    'r',
+    encoding='utf-8'
+)
+for i_line in random_file:
+    print(i_line)
+random_file.close()
+
+********************************************************************************
+
+initial_text = input('Введите строку: ')
+symbol_to_add = input('Введите дополнительный символ: ')
+
+print('\nСписок удвоенных символов:', [element * 2 for element in initial_text])
+print('Склейка с дополнительным символом:', [element * 2 + symbol_to_add for element in initial_text])
+
+********************************************************************************
+
+original_prices = [1.25, -9.45, 10.22, 3.78, -5.92, 1.16]
+print('Результат: ', [element if element > 0 else 0 for element in original_prices])
+
+********************************************************************************
+
+nums = [48, -10, 9, 38, 17, 50, -5, 43, 46, 12]
+print(nums[:5])
+print(nums[:-2])
+print(nums[::2])
+print(nums[1::2])
+print(nums[::-1])
+print(nums[::-2])
+
+********************************************************************************
+

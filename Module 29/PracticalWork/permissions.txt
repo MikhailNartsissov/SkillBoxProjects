@@ -1,0 +1,2 @@
+admin;delete_site;add_comment
+user_1;
